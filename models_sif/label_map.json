@@ -1,0 +1,9 @@
+{
+  "entertainment": 0,
+  "geography": 1,
+  "health": 2,
+  "politics": 3,
+  "science/technology": 4,
+  "sports": 5,
+  "travel": 6
+}
