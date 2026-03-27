@@ -12,7 +12,6 @@ env/
 ENV/
 .env
 .env.*
-data/
 datasets/
 models/
 models_sif/
