@@ -32,8 +32,7 @@ All commands should be run from the project root (`Asgn3-Neural-Topic-Classifica
 Create the output directories first:
 
 ```bash
-mkdir models
-mkdir embeddings
+mkdir -p models embeddings models_sif embeddings_sif
 ```
 
 ---
@@ -203,8 +202,8 @@ See [TRANSCRIPT.md](TRANSCRIPT.md) for the full terminal session run on mltgpu.
 
 | Split | Correct | Total | Accuracy | Chance (1/7) | Above chance |
 |-------|---------|-------|----------|--------------|--------------|
-| train | 190     | 701   | 27.1%    | 14.3%        | YES          |
-| dev   | 26      | 99    | 26.3%    | 14.3%        | YES          |
+| train | 176     | 701   | 25.1%    | 14.3%        | YES          |
+| dev   | 25      | 99    | 25.3%    | 14.3%        | YES          |
 | test  | 51      | 204   | 25.0%    | 14.3%        | YES          |
 
 ### Accuracy — SIF embeddings (a = 1e-3)
@@ -213,9 +212,9 @@ See [TRANSCRIPT.md](TRANSCRIPT.md) for the full terminal session run on mltgpu.
 |-------|---------|-------|----------|--------------|--------------|
 | train | 192     | 701   | 27.4%    | 14.3%        | YES          |
 | dev   | 29      | 99    | 29.3%    | 14.3%        | YES          |
-| test  | 55      | 204   | 27.0%    | 14.3%        | YES          |
+| test  | 54      | 204   | 26.5%    | 14.3%        | YES          |
 
-SIF improves dev accuracy by **+3 percentage points** (26.3% → 29.3%) and test accuracy by **+2 pp** (25.0% → 27.0%).
+SIF improves dev accuracy by **+4 percentage points** (25.3% → 29.3%) and test accuracy by **+1.5 pp** (25.0% → 26.5%).
 
 ---
 
@@ -223,15 +222,16 @@ SIF improves dev accuracy by **+3 percentage points** (26.3% → 29.3%) and test
 
 ### Confusion matrix
 
-The most striking feature of all three confusion matrices is that the model predicts **only two classes** — `politics` and `science/technology` — across every split. The columns for the other five classes (entertainment, geography, health, sports, travel) are entirely zero: no sentence was ever assigned to those labels.
+The most striking feature of the confusion matrices is a severe **majority-class collapse**. `science/technology` is the largest class in the training set (176 out of 701 sentences, ~25%) and `politics` is one of the larger ones (~15%).
 
-This is a classic case of **majority-class collapse**. `science/technology` is the largest class in the training set (176 out of 701 sentences, ~25%), and `politics` is one of the larger ones (~15%). The averaged FastText embeddings do not provide enough discriminative signal to separate all seven topics reliably; the model finds it more profitable to specialise in the two most frequent categories and ignore the rest.
+- **Mean embeddings:** the model predicts **only one class** — `science/technology` — across every split. All 701 training sentences are assigned to that single label; columns for all other six classes are entirely zero.
+- **SIF embeddings:** the model predicts **two classes** — `politics` and `science/technology`. The PC-removal step shifts some probability mass toward politics, but the other five classes remain unpredicted.
 
-All correct predictions come from two sources:
-- True `science/technology` sentences predicted as `science/technology` (143 on train).
-- True `politics` sentences predicted as `politics` (47 on train).
+All correct predictions come from:
+- True `science/technology` sentences predicted as `science/technology` (176 on train for mean; 141 on train for SIF).
+- True `politics` sentences predicted as `politics` (51 on train for SIF only; 0 for mean).
 
-Every other class has zero recall. For example, all `travel` sentences (138 on train) are misclassified as either `politics` or `science/technology`, even though `travel` is the second most common class. This suggests that topic-relevant characters in travel sentences closely resemble those in science/technology sentences at the character mean-vector level.
+Every other class has zero recall. For example, all `travel` sentences (138 on train) are misclassified as `science/technology` under mean embeddings, even though `travel` is the second most common class. This suggests that topic-relevant characters in travel sentences closely resemble those in science/technology sentences at the character mean-vector level.
 
 ### SIF vs mean embeddings
 
@@ -239,6 +239,6 @@ SIF produces a modest but consistent improvement over plain mean embeddings on b
 
 ### Above-chance performance
 
-With 7 classes, random chance gives 14.3%. The model achieves 27.1% on train, 26.3% on dev, and 25.0% on test — roughly **1.75× chance**. The consistent improvement across all splits (including unseen test data) confirms that the model has genuinely learned something from the training signal and is not merely memorising: the weights were updated in a way that captures real distributional differences between character-level sentence vectors.
+With 7 classes, random chance gives 14.3%. The mean-embedding model achieves 25.1% on train, 25.3% on dev, and 25.0% on test — roughly **1.76× chance**. The consistent improvement across all splits (including unseen test data) confirms that the model has genuinely learned something from the training signal and is not merely memorising: the weights were updated in a way that captures real distributional differences between character-level sentence vectors.
 
 That said, the absolute accuracy is poor. The core limitation is the input representation: averaging character vectors into a single fixed-length vector discards word order and sentence structure entirely, and compresses all topic signal into a 100-dimensional mean. A stronger representation — such as sentence-level pooling from a pre-trained Chinese BERT model — would likely yield substantially higher accuracy.

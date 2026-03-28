@@ -76,6 +76,7 @@ class FeedForwardClassifier(nn.Module):
 
 
 # Helper functions
+# ------------------------------------
 def load_npz(path: str):
     """Return (embeddings, labels) from a .npz file."""
     data = np.load(path, allow_pickle=True) # load the compressed numpy file
@@ -98,10 +99,8 @@ def accuracy(logits: torch.Tensor, targets: torch.Tensor) -> float:
     return (preds == targets).float().mean().item() # fraction of correct predictions
 
 
-
-# ---------------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # Training loop
-# ---------------------------------------------------------------------------
 def train(args):
     # Load sentence embeddings and their labels from the .npz files
     train_X, train_y_str = load_npz(args.train_embeddings)
@@ -114,7 +113,7 @@ def train(args):
     print(f"Classes ({len(label_map)}): {list(label_map.keys())}")
     print(f"Train: {len(train_X)} samples   Dev: {len(dev_X)} samples   Dim: {train_X.shape[1]}")
 
-    #wrap numpy arrays into PyTorch datasets so we can iterate over batches
+    # wrapping numpy arrays into PyTorch datasets so we can iterate over batches
     train_dataset = TensorDataset(torch.from_numpy(train_X), torch.from_numpy(train_y))
     dev_dataset = TensorDataset(torch.from_numpy(dev_X), torch.from_numpy(dev_y))
 
@@ -149,7 +148,7 @@ def train(args):
             X_batch, y_batch = X_batch.to(device), y_batch.to(device) # move batch to GPU/CPU
             optimiser.zero_grad() # clear gradients from the previous batch
             logits = model(X_batch) # forward pass: compute class scores
-            loss = criterion(logits, y_batch) # measure how wrong the predictions are
+            loss = criterion(logits, y_batch) #measure how wrong the predictions are
             loss.backward() # backprop: compute gradients
             optimiser.step() # update model weights using gradients
             total_loss += loss.item() * len(X_batch) # accumulate loss weighted by batch size
