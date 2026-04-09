@@ -37,7 +37,7 @@ mkdir -p models embeddings models_sif embeddings_sif
 
 ---
 
-### Step 1 — Train FastText word embeddings
+### Step 1 : Train FastText word embeddings
 
 Train character-level FastText embeddings over all three splits combined.
 
@@ -62,7 +62,7 @@ python scripts/train_fasttext.py \
 
 ---
 
-### Step 2 — Compute sentence embeddings
+### Step 2 : Compute sentence embeddings
 
 For each sentence in each split: tokenise by character → look up FastText vectors → average them into one vector.
 
@@ -84,7 +84,7 @@ Each `.npz` contains three arrays: `embeddings` (N × dim), `labels` (N,), `ids`
 
 ---
 
-### Step 3 — Train the classifier
+### Step 3 : Train the classifier
 
 Train a two-hidden-layer feed-forward network on the training embeddings, validated on dev.
 
@@ -127,7 +127,7 @@ When `--plot` is provided, a dual-axis training curve is saved showing loss (lef
 
 ---
 
-### Bonus — SIF embeddings
+### Bonus : SIF embeddings
 
 SIF (Smooth Inverse Frequency) is an alternative weighting scheme for sentence embeddings described in [Arora et al. (2017)](https://openreview.net/forum?id=SyK00v5xx). It has two steps:
 
@@ -170,7 +170,7 @@ python scripts/evaluate.py \
 
 ---
 
-### Step 4 — Evaluate
+### Step 4 : Evaluate
 
 Load the saved model and print accuracy and a confusion matrix for each split.
 
